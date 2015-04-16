@@ -24,14 +24,6 @@ sudo apt-get install lein
 
 ```lein run```
 
-* Name
-* Description
-* Installation instructions
-* Usage instructions
-* Support instructions
-* Contributing instructions
-
-
 ## Support
 
 Please [open an issue](https://github.com/dean/timesync-cli-closure/issues/new) for questions and concerns.
