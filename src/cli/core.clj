@@ -10,11 +10,15 @@
 
 (defn get-avail-projects []
   (let [url "http://140.211.168.242/projects"]
-    [client/get url {:accept :json}]))
+    (json/read-str
+      (get 
+        (client/get url {:accept :json}) :body))))
 
 
 (defn proj-in-list [to-find]
-  [get-avail-projects])
+  (some true?
+    (iterate #(= (get % :name) to-find) get-avail-projects)))
+
 
 (def cli-options
   [["-p" "--project PROJECT" "Project Slug"
@@ -37,4 +41,4 @@
 (defn -main [& args]
   ;; Comments/Docstrings?
   ;;(println (parse-opts args cli-options)))
-  (println (proj-in-list "orvsd") ))
+  (println (proj-in-list "orvsd")))
