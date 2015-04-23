@@ -4,20 +4,35 @@
   (:require [clj-http.lite.client :as client])
   (:gen-class))
 
-  ;; (some
-  ;;   (for [proj [seq get-avail-projects]
-  ;;     [#(= (get proj "name") to-find)]])))
 
-(defn get-avail-projects []
+(def get-projects
   (let [url "http://140.211.168.242/projects"]
     (json/read-str
       (get 
         (client/get url {:accept :json}) :body))))
 
 
-(defn proj-in-list [to-find]
+(def get-users
+  (let [url "http://140.211.168.242/users"]
+    (json/read-str
+      (get 
+        (client/get url {:accept :json}) :body))))
+
+
+(defn add-entry [args]
+  (let [url "http://140.211.168.242/activities/add"]
+    (client/post url {:query-params args} )))
+
+
+(defn proj-in-list [project]
   (some true?
-    (iterate #(= (get % :name) to-find) get-avail-projects)))
+      (map #(= (get % "name") project) get-projects)))
+
+
+(defn user-in-list[user]
+  (some true?
+      (map #(= (get % "username") user) get-users)))
+
 
 
 (def cli-options
@@ -26,8 +41,8 @@
     ["-d" "--duration DURATION" "Duration (Minutes)"
       :parse-fn #(Integer/parseInt %)
       :validate [#(> % 0) "Must be a number greater than 0."]]
-    ["-u" "--username USERNAME" "Username to log time under."]
-    ;; :validate ] This will later validate against the current users in the db.
+    ["-u" "--username USERNAME" "Username to log time under."
+    :validate [#(user-in-list %)]]
     ["-a" "--activity ACTIVITY" "Activity time spent working on."
       :id :activity]
     ["-n" "--notes NOTES" "Notes about activity worked on."
@@ -35,10 +50,9 @@
     ["-i" "--issue ISSUE" "URI for issue being worked on."
       :id :issue]])
 
-;; (defn send_req []
-;;  )
 
 (defn -main [& args]
   ;; Comments/Docstrings?
-  ;;(println (parse-opts args cli-options)))
-  (println (proj-in-list "orvsd")))
+  (let [cli-args (parse-opts args cli-options)]
+    (println
+      (add-entry (json/write-str (get cli-args :options))))))
